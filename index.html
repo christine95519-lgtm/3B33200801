@@ -1,156 +1,197 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>可愛狗狗互動網頁</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>互動式自我介紹</title>
   <style>
-    body {
-      font-family: "微軟正黑體", sans-serif;
-      margin: 0;
-      background-color: #ffe6ef; /* 淺粉紅底 */
-      text-align: center;
-      overflow-x: hidden;
+    :root{
+      --bg:#f7fbff;
+      --accent:#ffd7e6;
+      --text:#123; 
+      --card:#ffffff;
+      --glass: rgba(255,255,255,0.6);
     }
-
-    header {
-      background-color: #ffb6c1;
-      color: white;
-      padding: 20px;
-      font-size: 28px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    [data-theme='dark']{
+      --bg:#0b1220;
+      --accent:#2b1b2b;
+      --text:#e8eef8;
+      --card:#0f1724;
+      --glass: rgba(10,12,18,0.6);
     }
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", Arial;}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),var(--accent));color:var(--text);}
+    header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;backdrop-filter: blur(6px);background:var(--glass);border-radius:12px;margin:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08);} 
+    .logo{display:flex;gap:12px;align-items:center}
+    .logo .mark{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#bfe9ff,#ffd7e6);display:flex;align-items:center;justify-content:center;font-weight:700}
+    nav{display:flex;gap:12px;align-items:center}
+    .dropdown{position:relative}
+    .dropdown select{padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:transparent}
 
-    main {
-      background-color: white;
-      margin: 30px auto;
-      width: 85%;
-      border-radius: 16px;
-      padding: 30px 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 1;
+    main{padding:24px;margin:12px}
+    .card{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 8px 30px rgba(12,30,60,0.06);}
+    .intro{display:flex;gap:18px;align-items:center}
+    .avatar{width:120px;height:120px;border-radius:16px;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#d6f0ff,#ffe0f0);display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    h1{margin:0;font-size:1.4rem}
+    p.lead{margin:6px 0 0;color:rgba(0,0,0,0.6)}
+    button.btn{padding:8px 12px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(90deg,#bfe9ff,#ffd7e6);font-weight:700;margin:4px}
+    button.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06)}
+
+    /* 大頭貼視窗樣式 */
+    #modal{
+      display:none;
+      position:fixed;
+      top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.5);
+      align-items:center; justify-content:center;
+      z-index:1000;
     }
-
-    section {
-      margin: 25px auto;
-      padding: 15px;
-      width: 80%;
-      background-color: #ffeaf2;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    #modalContent{
+      background:white; padding:20px; border-radius:16px; text-align:center;
     }
-
-    h2 {
-      color: #e75480;
-    }
-
-    button {
-      background-color: #ff91a4;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background-color: #ff6f91;
-    }
-
-    footer {
-      background-color: #ffb6c1;
-      color: white;
-      padding: 15px;
-      font-size: 14px;
-    }
-
-    /* 🐶 狗狗動畫區 */
-    .dog {
-      position: absolute;
-      bottom: 30px;
-      left: -150px;
-      width: 120px;
-      animation: walk 12s linear infinite;
-      z-index: 0;
-    }
-
-    @keyframes walk {
-      0% { left: -150px; }
-      50% { transform: scaleX(1); }
-      100% { left: 100%; transform: scaleX(1); }
-    }
-
-    /* 🌸 動態背景飄花 */
-    .flower {
-      position: absolute;
-      top: -10px;
-      width: 20px;
-      height: 20px;
-      background-color: rgba(255,182,193,0.6);
-      border-radius: 50%;
-      animation: fall linear infinite;
-    }
-
-    @keyframes fall {
-      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    #modalContent img{
+      width:300px; height:300px; object-fit:cover; border-radius:16px;
+      margin-bottom:12px;
     }
   </style>
 </head>
-<body>
-  <header>
-    💕 我的可愛粉色網頁 💕
+<body data-theme="light">
+  <header class="card">
+    <div class="logo">
+      <div class="mark">自介</div>
+      <div>
+        <div style="font-weight:800">Chris</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.5)">互動式自我介紹頁面</div>
+      </div>
+    </div>
+    <nav>
+      <div class="dropdown">
+        <select id="quickSelect">
+          <option value="intro">自我介紹</option>
+          <option value="skills">技能</option>
+          <option value="projects">專案</option>
+          <option value="fun">互動區</option>
+        </select>
+      </div>
+      <button id="themeToggle" class="btn ghost">切換亮/暗</button>
+    </nav>
   </header>
 
   <main>
-    <section>
-      <h2>關於我</h2>
-      <p>嗨！我是喜歡狗狗和粉紅色的學生 🐾</p>
-      <p>我最喜歡的事情就是做可愛的網頁設計！</p>
+    <section class="card" id="intro">
+      <div class="intro">
+        <div class="avatar" id="avatar">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder" alt="avatar">
+        </div>
+        <div>
+          <h1>嗨，我是 Chris</h1>
+          <p class="lead">我是一位喜歡製作互動網頁的學生 / 開發者。</p>
+        </div>
+      </div>
     </section>
 
-    <section>
-      <h2>我的興趣</h2>
-      <ul style="text-align:left; display:inline-block;">
-        <li>🐶 和狗狗散步</li>
-        <li>🎨 畫可愛插畫</li>
-        <li>💻 製作網頁</li>
-        <li>🍰 吃甜點</li>
+    <section class="card" id="skills">
+      <h3>技能</h3>
+      <ul>
+        <li>HTML / CSS / JavaScript</li>
+        <li>簡單後端與資料庫</li>
+        <li>UI/UX 基礎</li>
       </ul>
     </section>
 
-    <section>
-      <h2>互動小驚喜</h2>
-      <button onclick="sayHello()">點我打招呼 💬</button>
+    <section class="card" id="projects">
+      <h3>專案</h3>
+      <p>書店管理系統、互動式作品集</p>
+    </section>
+
+    <section class="card" id="fun">
+      <h3>互動按鈕示範</h3>
+      <button class="btn specialBtn" id="btnShake">放大頭貼</button>
+      <button class="btn ghost" id="btnToggleIntro">顯示 / 隱藏自我介紹</button>
+      <button class="btn ghost" id="btnMessage">按鈕訊息視窗</button>
+      <button class="btn" id="btnPage">課堂作業按鈕</button>
+
+      <!-- 顏色/字型選擇器 -->
+      <p>
+        <label>選擇顏色：</label>
+        <input type="color" id="colorPicker" value="#ff0000">
+        <br>
+        <input type="radio" name="btnSelect" value="bodyBg" checked>背景顏色
+        <input type="radio" name="btnSelect" value="allBtns">全部按鈕顏色
+        <input type="radio" name="btnSelect" value="textColor">文字顏色
+      </p>
+      <button class="btn" id="btnChange">變換顏色/文字 (課程練習)</button>
     </section>
   </main>
 
-  <footer>
-    © 2025 我的可愛網站 | Designed with 💖
+  <!-- 大頭貼視窗 -->
+  <div id="modal">
+    <div id="modalContent">
+      <img id="modalImg" src="" alt="大頭貼">
+      <br>
+      <button class="btn specialBtn" id="btnCloseModal">關閉</button>
+    </div>
+  </div>
+
+  <footer class="card">
+    © 2025 Chris
   </footer>
 
-  <!-- 🐶 狗狗 GIF 動畫 -->
-  <img class="dog" src="https://media.tenor.com/I6kN-6X7nhAAAAAj/dog-walking.gif" alt="walking dog">
-
   <script>
-    // 👋 打招呼
-    function sayHello() {
-      alert("汪汪！🐾 歡迎來到我的可愛粉色世界！");
-    }
+    const body=document.body;
+    document.getElementById('themeToggle').addEventListener('click',()=>{
+      body.setAttribute('data-theme', body.getAttribute('data-theme')==='light'?'dark':'light');
+    });
 
-    // 🌸 動態花瓣飄落效果
-    function createFlower() {
-      const flower = document.createElement("div");
-      flower.classList.add("flower");
-      flower.style.left = Math.random() * window.innerWidth + "px";
-      flower.style.animationDuration = 5 + Math.random() * 5 + "s";
-      document.body.appendChild(flower);
-      setTimeout(() => flower.remove(), 10000);
-    }
-    setInterval(createFlower, 500);
+    document.getElementById('quickSelect').addEventListener('change',function(){
+      document.getElementById(this.value).scrollIntoView({behavior:'smooth'});
+    });
+
+    // 放大頭貼功能
+    const modal=document.getElementById('modal');
+    const modalImg=document.getElementById('modalImg');
+    const avatar=document.getElementById('avatar');
+    const btnCloseModal=document.getElementById('btnCloseModal');
+    const btnShake=document.getElementById('btnShake');
+
+    btnShake.addEventListener('click',()=>{
+      modalImg.src=avatar.querySelector('img').src;
+      modal.style.display='flex';
+    });
+
+    btnCloseModal.addEventListener('click',()=>{
+      modal.style.display='none';
+    });
+
+    document.getElementById('btnToggleIntro').addEventListener('click',()=>{
+      const sec=document.getElementById('intro');
+      sec.style.display=sec.style.display==='none'?'block':'none';
+    });
+
+    document.getElementById('btnMessage').addEventListener('click',()=>{ alert('這是一個互動訊息視窗！'); });
+    document.getElementById('btnPage').addEventListener('click',()=>{ alert('這是課堂作業按鈕示範！'); });
+
+    // 課程練習：根據選擇變換背景、全部按鈕或文字顏色
+    document.getElementById('btnChange').addEventListener('click',()=>{
+      const color=document.getElementById('colorPicker').value;
+      const selected=document.querySelector('input[name="btnSelect"]:checked').value;
+      if(selected==='bodyBg'){
+        document.body.style.background=color;
+      } else if(selected==='allBtns'){
+        document.querySelectorAll('.btn, .specialBtn').forEach(btn=>btn.style.backgroundColor=color);
+      } else if(selected==='textColor'){
+        document.querySelectorAll('body, button, h1, p').forEach(el=>el.style.color=color);
+      }
+    });
+
+    // 點擊頭貼直接換圖
+    avatar.addEventListener('click',()=>{
+      const img=avatar.querySelector('img');
+      img.src=img.src.includes('photo-154400')?
+        'https://images.unsplash.com/photo-1545996124-1f26b1b9d8a9?q=80&w=800&auto=format&fit=crop&s=placeholder'
+        :'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder';
+    });
   </script>
 </body>
 </html>
